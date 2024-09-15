@@ -123,7 +123,7 @@ public class App {
     private static void retiradaEquipamento(Scanner scanner) {
         System.out.println("=== Retirada de Equipamento ===");
         System.out.print("Código do Funcionário: ");
-            int codigoFuncionario = scanner.nextInt();
+        int codigoFuncionario = scanner.nextInt();
         Funcionario funcionario = buscarFuncionarioPorCodigo(codigoFuncionario);
     
         if (funcionario == null) {
@@ -132,11 +132,21 @@ public class App {
         }
     
         System.out.print("Código do Equipamento: ");
-            int codigoEquipamento = scanner.nextInt();
+        int codigoEquipamento = scanner.nextInt();
         Equipamentos equipamento = buscarEquipamentoPorCodigo(codigoEquipamento);
     
-        if (equipamento == null || !equipamento.isDisponivel()) {
-            System.out.println("Equipamento não encontrado ou indisponível.");
+        if (equipamento == null) {
+            System.out.println("Equipamento não encontrado.");
+            return;
+        }
+
+        if (equipamento.getEstadoConservacao() == 3) {
+            System.out.println("Equipamento precisa de manutenção e não pode ser retirado.");
+            return;
+        }
+    
+        if (!equipamento.isDisponivel()) {
+            System.out.println("Equipamento não está disponível.");
             return;
         }
     
@@ -214,7 +224,7 @@ public class App {
     private static void menuEquipamentos(Scanner scanner) {
         int opcao = 0;
 
-        while (opcao != 0) {
+        while (opcao != 7) {
             System.out.println("=== Menu de Equipamentos ===");
             System.out.println("1. Lista de Equipamentos Disponíveis");
             System.out.println("2. Enviar Equipamento para Manutenção");
@@ -222,7 +232,7 @@ public class App {
             System.out.println("4. Retornar Equipamento da Manutenção");
             System.out.println("5. Histórico de Manutenção");
             System.out.println("6. Mudar Estado de Conservação do Equipamento");
-            System.out.println("0. Voltar ao Menu Principal");
+            System.out.println("7. Voltar ao Menu Principal");
             System.out.print("Escolha uma opção: ");
             opcao = scanner.nextInt();
             scanner.nextLine();
@@ -247,7 +257,7 @@ public class App {
                     System.out.print("Código do Equipamento: ");
                     int codigoEquipamento = scanner.nextInt();
                     mudarEstado(scanner, codigoEquipamento);
-                case 0:
+                case 7:
                     System.out.println("Voltando ao Menu Principal...");
                     break;
                 default:
@@ -260,15 +270,15 @@ public class App {
     private static void listaEquipamentosDisponiveis() {
         System.out.println("=== Equipamentos Disponíveis ===");
         boolean haEquipamentosDisponiveis = false;
-
+        boolean haEquipamentosEmManutencao = false;
         for (Equipamentos equipamento : listaEquipamentos) {
-            if (equipamento.isDisponivel()) {
+            if (equipamento.isDisponivel() || equipamento.isEmManutencao()) {
                 System.out.println(equipamento);
                 haEquipamentosDisponiveis = true;
+                haEquipamentosEmManutencao = true;
             }
         }
-
-        if (!haEquipamentosDisponiveis) {
+        if (!haEquipamentosDisponiveis || !haEquipamentosEmManutencao) {
             System.out.println("Nenhum equipamento disponível no momento.");
         }
     }
@@ -283,17 +293,14 @@ public class App {
             System.out.println("Equipamento não encontrado.");
             return;
         }
-    
         if (equipamento.getEstadoConservacao() != 3) {
             System.out.println("Equipamento não está na condição necessária para envio à manutenção.");
             return;
         }
-    
-        if (!equipamento.isDisponivel()) {
+        if (!equipamento.isDisponivel() || equipamento.isEmManutencao()) {
             System.out.println("Equipamento já está em uso ou em manutenção.");
             return;
         }
-    
         equipamento.setDisponivel(false);
         equipamento.setEmManutencao(true); 
         equipamento.adicionarManutencao("Equipamento enviado para manutenção em: " + new Date());
@@ -326,7 +333,6 @@ public class App {
             System.out.println("Equipamento não está em manutenção.");
             return;
         }
-    
         equipamento.setDisponivel(true);
         equipamento.setEmManutencao(false);
         equipamento.adicionarManutencao("Equipamento retornado da manutenção em: " + new Date());
@@ -335,7 +341,6 @@ public class App {
 
     private static void historicoManutencao() {
         System.out.println("=== Histórico de Manutenção ===");
-
         for (Equipamentos equipamento : listaEquipamentos) {
             if (!equipamento.getHistoricoManutencao().isEmpty()) {
                 System.out.println("Equipamento Código: " + equipamento.getCodigo());
@@ -345,15 +350,13 @@ public class App {
         }
     }
 
-        private static void mudarEstado (Scanner scanner, int codigoEquipamento) {
-                Equipamentos equipamento = buscarEquipamentoPorCodigo(codigoEquipamento);
-        
-                if (equipamento == null) {
-                    System.out.println("Equipamento não encontrado.");
-                    
-                } else {
-                    System.out.println(equipamento);
-                    System.out.print("Estado de Conservação (1 - Bom, 2 - Aceitável, 3 - Precisando de Manutenção): ");
+    private static void mudarEstado (Scanner scanner, int codigoEquipamento) {
+        Equipamentos equipamento = buscarEquipamentoPorCodigo(codigoEquipamento);
+            if (equipamento == null) {
+                System.out.println("Equipamento não encontrado.");
+            } else {
+                System.out.println(equipamento);
+                System.out.print("Estado de Conservação (1 - Bom, 2 - Aceitável, 3 - Precisando de Manutenção): ");
             int estadoConservacao = scanner.nextInt();
             equipamento.setEstadoConservacao(estadoConservacao);
             System.out.println("Equipamento modificado com sucesso!");

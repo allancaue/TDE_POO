@@ -48,6 +48,9 @@ public class Equipamentos {
 
     public void setDisponivel(boolean disponivel) {
         this.disponivel = disponivel;
+        if(disponivel = true){
+            emManutencao = false;
+        }
     }
 
     public String getHistoricoManutencao() {

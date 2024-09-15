@@ -186,7 +186,6 @@ public class App {
 
     private static void visualizarEmprestimos() {
         System.out.println("=== Empréstimos em Andamento ===");
-
         for (Emprestimo emprestimo : listaEmprestimos) {
             if (emprestimo.getDataEntrega() == null) {
                 System.out.println(emprestimo);
@@ -224,7 +223,7 @@ public class App {
     private static void menuEquipamentos(Scanner scanner) {
         int opcao = 0;
 
-        while (opcao != 7) {
+        while (opcao != 8) {
             System.out.println("=== Menu de Equipamentos ===");
             System.out.println("1. Lista de Equipamentos Disponíveis");
             System.out.println("2. Enviar Equipamento para Manutenção");
@@ -232,7 +231,8 @@ public class App {
             System.out.println("4. Retornar Equipamento da Manutenção");
             System.out.println("5. Histórico de Manutenção");
             System.out.println("6. Mudar Estado de Conservação do Equipamento");
-            System.out.println("7. Voltar ao Menu Principal");
+            System.out.println("7. Excluir Equipamento");
+            System.out.println("8. Voltar ao Menu Principal");
             System.out.print("Escolha uma opção: ");
             opcao = scanner.nextInt();
             scanner.nextLine();
@@ -257,7 +257,11 @@ public class App {
                     System.out.print("Código do Equipamento: ");
                     int codigoEquipamento = scanner.nextInt();
                     mudarEstado(scanner, codigoEquipamento);
-                case 7:
+                    break;
+                    case 7:
+                    excluirEquipamento(scanner);
+                    break;
+                case 8:
                     System.out.println("Voltando ao Menu Principal...");
                     break;
                 default:
@@ -270,15 +274,15 @@ public class App {
     private static void listaEquipamentosDisponiveis() {
         System.out.println("=== Equipamentos Disponíveis ===");
         boolean haEquipamentosDisponiveis = false;
-        boolean haEquipamentosEmManutencao = false;
+    
         for (Equipamentos equipamento : listaEquipamentos) {
-            if (equipamento.isDisponivel() || equipamento.isEmManutencao()) {
+            if (equipamento.isDisponivel() && !equipamento.isEmManutencao() && equipamento.getEstadoConservacao() != 3) {
                 System.out.println(equipamento);
                 haEquipamentosDisponiveis = true;
-                haEquipamentosEmManutencao = true;
             }
         }
-        if (!haEquipamentosDisponiveis || !haEquipamentosEmManutencao) {
+    
+        if (!haEquipamentosDisponiveis) {
             System.out.println("Nenhum equipamento disponível no momento.");
         }
     }
@@ -335,6 +339,7 @@ public class App {
         }
         equipamento.setDisponivel(true);
         equipamento.setEmManutencao(false);
+        mudarEstado (scanner, codigoEquipamento);
         equipamento.adicionarManutencao("Equipamento retornado da manutenção em: " + new Date());
         System.out.println("Equipamento retornado da manutenção com sucesso!");
     }    
@@ -364,4 +369,20 @@ public class App {
             System.out.println("Equipamento: " + equipamento.getNome() + " Estado de concervação: " + equipamento.getEstadoConservacao());
         }
     }
+
+    private static void excluirEquipamento(Scanner scanner) {
+        System.out.println("=== Excluir Equipamento ===");
+        System.out.print("Código do Equipamento a ser excluído: ");
+        int codigoEquipamento = scanner.nextInt();
+        
+        Equipamentos equipamento = buscarEquipamentoPorCodigo(codigoEquipamento);
+        
+        if (equipamento == null) {
+            System.out.println("Equipamento não encontrado.");
+            return;
+        }
+        
+        listaEquipamentos.remove(equipamento);
+        System.out.println("Equipamento excluído com sucesso!");
+    }    
 }

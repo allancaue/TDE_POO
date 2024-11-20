@@ -176,53 +176,108 @@ public class AppGUI extends JFrame {
     }
 
     private void realizarRetirada() {
-        // Cria diálogo para retirada de equipamento
         JTextField codFuncionario = new JTextField();
         JTextField codEquipamento = new JTextField();
         JTextField observacoes = new JTextField();
-
+    
         Object[] message = {
             "Código do Funcionário:", codFuncionario,
             "Código do Equipamento:", codEquipamento,
             "Observações:", observacoes,
         };
-
+    
         int option = JOptionPane.showConfirmDialog(this, message, "Retirada de Equipamento", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            // Implemente a lógica de retirada
-            int codigoFuncionario = Integer.parseInt(codFuncionario.getText());
-            int codigoEquipamento = Integer.parseInt(codEquipamento.getText());
-
-            Funcionario funcionario = buscarFuncionarioPorCodigo(codigoFuncionario);
-            Equipamentos equipamento = buscarEquipamentoPorCodigo(codigoEquipamento);
-
-            if (funcionario == null || equipamento == null || !equipamento.isDisponivel()) {
-                JOptionPane.showMessageDialog(this, "Funcionário ou Equipamento inválido ou indisponível.");
-                return;
+            try {
+                int codigoFuncionario = Integer.parseInt(codFuncionario.getText());
+                int codigoEquipamento = Integer.parseInt(codEquipamento.getText());
+    
+                Funcionario funcionario = buscarFuncionarioPorCodigo(codigoFuncionario);
+                Equipamentos equipamento = buscarEquipamentoPorCodigo(codigoEquipamento);
+    
+                if (funcionario == null || equipamento == null) {
+                    JOptionPane.showMessageDialog(this, "Funcionário ou Equipamento não encontrados.");
+                    return;
+                }
+    
+                if (!equipamento.isDisponivel()) {
+                    JOptionPane.showMessageDialog(this, "Equipamento não está disponível.");
+                    return;
+                }
+    
+                // Criar o empréstimo e atualizar o status do equipamento
+                Emprestimo emprestimo = new Emprestimo(funcionario, equipamento, observacoes.getText());
+                listaEmprestimos.add(emprestimo);
+                equipamento.setDisponivel(false);
+    
+                JOptionPane.showMessageDialog(this, "Empréstimo realizado com sucesso!");
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Por favor, insira valores válidos.", "Erro", JOptionPane.ERROR_MESSAGE);
             }
-
-            Emprestimo emprestimo = new Emprestimo(funcionario, equipamento, observacoes.getText());
-            listaEmprestimos.add(emprestimo);
-            equipamento.setDisponivel(false);
-
-            JOptionPane.showMessageDialog(this, "Empréstimo realizado com sucesso!");
         }
-    }
+    }    
 
     private void realizarEntrega() {
-        // Similar ao método de retirada
-        JOptionPane.showMessageDialog(this, "Entrega de Equipamento em construção!");
-    }
+        JTextField codEquipamento = new JTextField();
+        Object[] message = {
+            "Código do Equipamento:", codEquipamento
+        };
+    
+        int option = JOptionPane.showConfirmDialog(this, message, "Entrega de Equipamento", JOptionPane.OK_CANCEL_OPTION);
+        if (option == JOptionPane.OK_OPTION) {
+            try {
+                int codigoEquipamento = Integer.parseInt(codEquipamento.getText());
+    
+                Equipamentos equipamento = buscarEquipamentoPorCodigo(codigoEquipamento);
+    
+                if (equipamento == null) {
+                    JOptionPane.showMessageDialog(this, "Equipamento não encontrado.");
+                    return;
+                }
+    
+                Emprestimo emprestimo = null;
+    
+                // Verifica se o equipamento está emprestado
+                for (Emprestimo e : listaEmprestimos) {
+                    if (e.getEquipamento().equals(equipamento) && e.getDataEntrega() == null) {
+                        emprestimo = e;
+                        break;
+                    }
+                }
+    
+                if (emprestimo == null) {
+                    JOptionPane.showMessageDialog(this, "Equipamento não está emprestado.");
+                    return;
+                }
+    
+                // Atualiza o estado do empréstimo e equipamento
+                emprestimo.setDataEntrega(new Date());
+                equipamento.setDisponivel(true);
+    
+                JOptionPane.showMessageDialog(this, "Equipamento entregue com sucesso!");
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Por favor, insira um código válido.", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }    
 
     private void visualizarEmprestimos() {
         StringBuilder emprestimos = new StringBuilder("=== Empréstimos em Andamento ===\n");
+        boolean existemEmprestimos = false;
+    
         for (Emprestimo e : listaEmprestimos) {
             if (e.getDataEntrega() == null) {
                 emprestimos.append(e).append("\n");
+                existemEmprestimos = true;
             }
         }
-        JOptionPane.showMessageDialog(this, emprestimos.length() > 0 ? emprestimos.toString() : "Nenhum empréstimo em andamento.");
-    }
+    
+        if (existemEmprestimos) {
+            JOptionPane.showMessageDialog(this, emprestimos.toString());
+        } else {
+            JOptionPane.showMessageDialog(this, "Nenhum empréstimo em andamento.");
+        }
+    }    
 
     private Funcionario buscarFuncionarioPorCodigo(int codigo) {
         for (Funcionario f : listaFuncionarios) {
@@ -298,21 +353,25 @@ public class AppGUI extends JFrame {
     
         int option = JOptionPane.showConfirmDialog(this, message, "Enviar para Manutenção", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
-            int codigo = Integer.parseInt(codEquipamento.getText());
-            Equipamentos equipamento = buscarEquipamentoPorCodigo(codigo);
+            try {
+                int codigo = Integer.parseInt(codEquipamento.getText());
+                Equipamentos equipamento = buscarEquipamentoPorCodigo(codigo);
     
-            if (equipamento == null || equipamento.getEstadoConservacao() != 3 || equipamento.isEmManutencao() || !equipamento.isDisponivel()) {
-                JOptionPane.showMessageDialog(this, "Equipamento inválido ou não elegível para manutenção.");
-                return;
+                if (equipamento == null || equipamento.getEstadoConservacao() != 3 || equipamento.isEmManutencao() || !equipamento.isDisponivel()) {
+                    JOptionPane.showMessageDialog(this, "Equipamento inválido ou não elegível para manutenção.");
+                    return;
+                }
+    
+                equipamento.setEmManutencao(true);
+                equipamento.setDisponivel(false);
+                equipamento.adicionarManutencao("Equipamento enviado para manutenção em: " + new Date());
+    
+                JOptionPane.showMessageDialog(this, "Equipamento enviado para manutenção com sucesso!");
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Código do equipamento inválido.", "Erro", JOptionPane.ERROR_MESSAGE);
             }
-    
-            equipamento.setEmManutencao(true);
-            equipamento.setDisponivel(false);
-            equipamento.adicionarManutencao("Equipamento enviado para manutenção em: " + new Date());
-    
-            JOptionPane.showMessageDialog(this, "Equipamento enviado para manutenção com sucesso!");
         }
-    }
+    }    
     
     private void listarEquipamentosEmManutencao() {
         StringBuilder emManutencao = new StringBuilder("=== Equipamentos em Manutenção ===\n");
@@ -402,9 +461,12 @@ public class AppGUI extends JFrame {
                 JOptionPane.showMessageDialog(this, "Equipamento não encontrado.");
                 return;
             }
-    
-            listaEquipamentos.remove(equipamento);
-            JOptionPane.showMessageDialog(this, "Equipamento excluído com sucesso!");
+            if (option == JOptionPane.OK_OPTION) {
+                listaEquipamentos.remove(equipamento);
+                JOptionPane.showMessageDialog(this, "Equipamento excluído com sucesso!");
+            } else {
+                JOptionPane.showMessageDialog(this, "Exclusão cancelada.");
+            }            
         }
     }    
 

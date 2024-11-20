@@ -1,5 +1,6 @@
 package Class;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class Equipamentos {
@@ -14,7 +15,7 @@ public class Equipamentos {
     private int estadoConservacao;
     private boolean disponivel = true;
     private boolean emManutencao = false;
-    private String historicoManutencao;
+    private ArrayList<String> historicoManutencao;
 
     public Equipamentos(String nome, String descricao, float peso, float largura, float comprimento, int estadoConservacao) {
         this.codigo = ++contadorCodigo;
@@ -25,7 +26,7 @@ public class Equipamentos {
         this.largura = largura;
         this.comprimento = comprimento;
         this.estadoConservacao = estadoConservacao;
-        this.historicoManutencao = "";
+        this.historicoManutencao = new ArrayList<>();
 
     }
 
@@ -54,7 +55,7 @@ public class Equipamentos {
     }
 
     public String getHistoricoManutencao() {
-        return historicoManutencao;
+        return String.join("\n", historicoManutencao);
     }
 
     public int getEstadoConservacao() {
@@ -67,7 +68,7 @@ public class Equipamentos {
 
 
     public void adicionarManutencao(String manutencao) {
-        historicoManutencao += manutencao + "\n";
+        historicoManutencao.add(manutencao);
     }
 
     public void setEmManutencao(boolean emManutencao) {

@@ -5,7 +5,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Date;
 import javax.swing.*;
-
+import javax.swing.border.EmptyBorder;
 
 public class AppGUI extends JFrame {
     private JPanel mainPanel;
@@ -15,20 +15,29 @@ public class AppGUI extends JFrame {
 
     public AppGUI() {
         setTitle("Sistema de Gestão de Equipamentos");
-        setSize(600, 500);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // Paleta de cores e fontes
+        UIManager.put("Button.font", new Font("Arial", Font.BOLD, 14));
+        UIManager.put("Label.font", new Font("Arial", Font.PLAIN, 14));
+        UIManager.put("Button.background", new Color(59, 89, 182));
+        UIManager.put("Button.foreground", Color.WHITE);
+
+        // Inicializar listas
         listaFuncionarios = new ArrayList<>();
         listaEquipamentos = new ArrayList<>();
         listaEmprestimos = new ArrayList<>();
-        
-        mainPanel = new JPanel(new CardLayout());
 
-        // Inicializar as telas
+        mainPanel = new JPanel(new CardLayout());
+        mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        // Adicionar os painéis
         mainPanel.add(createMenuPanel(), "Menu");
         mainPanel.add(createEquipamentoCadastroPanel(), "CadastroEquipamentos");
         mainPanel.add(createFuncionarioCadastroPanel(), "CadastroFuncionarios");
-        mainPanel.add(createMenuEquipamentosPanel(), "MenuEquipamentos");
         mainPanel.add(createEmprestimosPanel(), "Emprestimos");
+        mainPanel.add(createMenuEquipamentosPanel(), "MenuEquipamentos");
 
         add(mainPanel);
         setLocationRelativeTo(null);
@@ -37,6 +46,9 @@ public class AppGUI extends JFrame {
     private JPanel createMenuPanel() {
         JPanel panel = new JPanel(new GridLayout(7, 1));
         panel.add(new JLabel("=== Menu Principal ===", SwingConstants.CENTER));
+        panel.setBorder(new EmptyBorder(15, 15, 10, 10));
+        panel.setBackground(Color.WHITE);
+
 
         JButton btnCadastroEquipamentos = new JButton("Cadastro de Equipamentos");
         btnCadastroEquipamentos.addActionListener(e -> showPanel("CadastroEquipamentos"));

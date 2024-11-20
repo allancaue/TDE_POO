@@ -357,13 +357,21 @@ public class AppGUI extends JFrame {
                 int codigo = Integer.parseInt(codEquipamento.getText());
                 Equipamentos equipamento = buscarEquipamentoPorCodigo(codigo);
     
-                if (equipamento == null || equipamento.getEstadoConservacao() != 3 || equipamento.isEmManutencao() || !equipamento.isDisponivel()) {
-                    JOptionPane.showMessageDialog(this, "Equipamento inválido ou não elegível para manutenção.");
+                if (equipamento == null) {
+                    JOptionPane.showMessageDialog(this, "Equipamento inválido.");
+                    return;
+                }
+                if (equipamento.getEstadoConservacao() != 3) {
+                    JOptionPane.showMessageDialog(this, "Equipamento não está na condição necessária para envio à manutenção.");
+                    return;
+                }
+                if (!equipamento.isDisponivel() || equipamento.isEmManutencao()) {
+                    JOptionPane.showMessageDialog(this, "Equipamento já está em uso ou em manutenção.");
                     return;
                 }
     
-                equipamento.setEmManutencao(true);
                 equipamento.setDisponivel(false);
+                equipamento.setEmManutencao(true);
                 equipamento.adicionarManutencao("Equipamento enviado para manutenção em: " + new Date());
     
                 JOptionPane.showMessageDialog(this, "Equipamento enviado para manutenção com sucesso!");

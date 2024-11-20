@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import javax.swing.*;
 
+
 public class AppGUI extends JFrame {
     private JPanel mainPanel;
     private ArrayList<Funcionario> listaFuncionarios;
@@ -402,17 +403,18 @@ public class AppGUI extends JFrame {
         int option = JOptionPane.showConfirmDialog(this, message, "Retornar da Manutenção", JOptionPane.OK_CANCEL_OPTION);
         if (option == JOptionPane.OK_OPTION) {
             int codigo = Integer.parseInt(codEquipamento.getText());
-            Equipamentos equipamento = buscarEquipamentoPorCodigo(codigo);
+        Equipamentos equipamento = buscarEquipamentoPorCodigo(codigo);
     
             if (equipamento == null || !equipamento.isEmManutencao()) {
                 JOptionPane.showMessageDialog(this, "Equipamento não está em manutenção ou não existe.");
                 return;
             }
-    
-            equipamento.setEmManutencao(false);
+            
             equipamento.setDisponivel(true);
+            equipamento.setEmManutencao(false);
             equipamento.adicionarManutencao("Equipamento retornado da manutenção em: " + new Date());
-    
+            equipamento.setEstadoConservacao(1);
+
             JOptionPane.showMessageDialog(this, "Equipamento retornado da manutenção com sucesso!");
         }
     }
@@ -455,7 +457,7 @@ public class AppGUI extends JFrame {
             JOptionPane.showMessageDialog(this, "Estado de conservação atualizado com sucesso!");
         }
     }
-    
+
     private void excluirEquipamento() {
         JTextField codEquipamento = new JTextField();
         Object[] message = {"Código do Equipamento:", codEquipamento};
